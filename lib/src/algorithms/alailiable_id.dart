@@ -4,7 +4,7 @@ int getAvailibleValueId(
   List<List<int?>> valueMatrix,
   int range,
 ) {
-  int valueId = 1;
+  int valueId = 0;
   valueMatrix[row][column] = valueId;
   return valueId;
 }
