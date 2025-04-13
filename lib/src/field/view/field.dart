@@ -113,6 +113,7 @@ class Field extends PositionComponent
             column,
             valueMatrix,
             world.valuesNumber,
+            game.random,
           );
           Vector2 tilePosition = getTilePosition(row, column, tileSize, true);
           Tile tile = Tile(

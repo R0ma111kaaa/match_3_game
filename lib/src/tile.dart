@@ -24,7 +24,7 @@ class Tile extends PositionComponent with HasWorldReference<GameWorld> {
     priority = 10;
     add(
       RectangleComponent(
-        paint: Paint()..color = Colors.teal,
+        paint: Paint()..color = world.tileValues[valueId],
         size: Vector2.all(20),
         anchor: Anchor.center,
         position: Vector2(size.x / 2, size.y / 2),
