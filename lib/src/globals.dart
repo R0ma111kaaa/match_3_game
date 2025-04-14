@@ -1,3 +1,4 @@
+import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class Globals {
@@ -12,7 +13,13 @@ class Globals {
   static final double fieldOffset = 10;
   static final double tilePadding = 1;
 
-  static final double resizeDuration = 3;
+  static final double tileBoxOffsetPadding = 3;
+  static final double tileBoxInternalDistanseCoef = 4;
+
+  static final double fieldResizeDuration = 3;
+  static final double tilesSwapDuration = 0.2;
+
+  static final Vector2 defaultButtonSize = Vector2.all(50);
 }
 
 class GameColors {
@@ -28,3 +35,5 @@ class GameColors {
 }
 
 class Fonts {}
+
+enum SwipeDirection { left, right, up, down }

@@ -1,13 +1,17 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/game_world.dart';
 
-class Tile extends PositionComponent with HasWorldReference<GameWorld> {
+class Tile extends PositionComponent
+    with HasWorldReference<GameWorld>, TapCallbacks, DragCallbacks {
   int rowIndex;
   int columnindex;
   final int valueId;
+
+  bool moveable = true;
 
   Tile({
     required this.rowIndex,
@@ -24,13 +28,36 @@ class Tile extends PositionComponent with HasWorldReference<GameWorld> {
     priority = 10;
     add(
       RectangleComponent(
-        paint: Paint()..color = Colors.teal,
-        size: Vector2.all(20),
+        paint: Paint()..color = world.tileValues[valueId],
+        size: Vector2.all(size.x * 0.7),
         anchor: Anchor.center,
         position: Vector2(size.x / 2, size.y / 2),
       ),
     );
     return super.onLoad();
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    world.field.onTileTapped(this);
+    super.onTapDown(event);
+  }
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    world.field.startDrag(this);
+    super.onDragStart(event);
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    if (event.canvasEndPosition.x > size.x ||
+        event.canvasEndPosition.x < 0 ||
+        event.canvasEndPosition.y > size.y ||
+        event.canvasEndPosition.y < 0) {
+      world.field.updateDrag(event.canvasDelta);
+      super.onDragUpdate(event);
+    }
   }
 
   // не работает как и в филде

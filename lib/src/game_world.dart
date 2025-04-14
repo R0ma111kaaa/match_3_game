@@ -14,41 +14,28 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   // есть несолько измерений (изменение не равно мир)
   // в каждом измерении свои уровни, цвета, картинки и т.д.
   // при переходе в другое измерение параметры примведенные ниже меняются
-  List<RectangleComponent> tileValues = [
-    RectangleComponent(
-      paint: Paint()..color = Colors.blueAccent,
-      size: Vector2.all(20),
-    ),
-    RectangleComponent(
-      paint: Paint()..color = Colors.red,
-      size: Vector2.all(20),
-    ),
-    RectangleComponent(
-      paint: Paint()..color = Colors.teal,
-      size: Vector2.all(20),
-    ),
-    RectangleComponent(
-      paint: Paint()..color = Colors.purple,
-      size: Vector2.all(20),
-    ),
-    RectangleComponent(
-      paint: Paint()..color = Colors.pink,
-      size: Vector2.all(20),
-    ),
+  List<Color> tileValues = [
+    Colors.red,
+    Colors.yellow,
+    Colors.green,
+    Colors.orange,
+    Colors.blue,
   ];
-  int valuesNumber = 5;
+  late int valuesNumber;
   // пока что захардкожено, потом нужно добавить в Globals
   // для каждого изерения разные параметры
 
   @override
   FutureOr<void> onLoad() {
+    valuesNumber = tileValues.length;
     addAll([
       HomePageBackground(),
       field = Field(
         size: Vector2.all(gameRef.size.x - Globals.fieldOffset * 2),
-        elementPerRow: 10,
+        elementPerRow: 9,
       ),
-      BackButton(size: Vector2.all(100)),
+      BackButton(size: Globals.defaultButtonSize)
+        ..position = Globals.defaultButtonSize,
     ]);
     return super.onLoad();
   }

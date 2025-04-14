@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
@@ -9,6 +10,8 @@ import 'package:match_3_game/src/pages/settings_page.dart';
 
 class Match3Game extends FlameGame {
   late final RouterComponent router;
+
+  Random random = Random();
 
   // @override
   // bool debugMode = true;
