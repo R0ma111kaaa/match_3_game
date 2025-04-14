@@ -7,7 +7,7 @@ import 'package:match_3_game/src/globals.dart';
 
 class BackButton extends IconButton with HasGameRef<Match3Game> {
   BackButton({required super.size})
-    : super(color: GameColors.grey, tapColor: GameColors.black);
+    : super(color: GameColors.grey, tapColor: GameColors.red);
 
   @override
   Future<void> onLoad() async {
