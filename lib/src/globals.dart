@@ -18,6 +18,9 @@ class Globals {
 
   static final double fieldResizeDuration = 3;
   static final double tilesSwapDuration = 0.2;
+  static final double tileRemoveDuration = 0.2;
+  static final double tileDropDuration = 0.1;
+  static final int waitDurationMiliseconds = 500;
 
   static final Vector2 defaultButtonSize = Vector2.all(50);
 }

@@ -6,7 +6,8 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:match_3_game/src/algorithms/alailiable_id.dart';
+import 'package:match_3_game/src/algorithms/check_combinations.dart';
+import 'package:match_3_game/src/algorithms/get_alailiable_id.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
@@ -17,7 +18,8 @@ class Field extends PositionComponent
   int elementPerRow;
   late Vector2 tileSize;
 
-  List<List<Tile?>> tiles;
+  List<List<Tile?>> tileMatrix;
+  late ClipComponent drawableField;
 
   Tile? selectedTile;
   Tile? draggedTile;
@@ -34,13 +36,16 @@ class Field extends PositionComponent
   final Paint _tileBoxColor = Paint()..color = GameColors.white;
 
   Field({required super.size, required this.elementPerRow})
-    : tiles = List.generate(
+    : tileMatrix = List.generate(
         elementPerRow,
         (_) => List.generate(elementPerRow, (_) => null),
       );
 
   @override
   Future<void> onLoad() async {
+    drawableField = ClipComponent.rectangle(size: size, position: position);
+    add(drawableField);
+
     _fieldRrect = RRect.fromLTRBR(
       0,
       0,
@@ -50,7 +55,9 @@ class Field extends PositionComponent
     );
     tileSize = getTileSize(size);
     anchor = Anchor.center;
-    fillEmptyField();
+    fillEmptyField(
+      List.generate(tileMatrix[0].length, (_) => tileMatrix.length),
+    );
   }
 
   @override
@@ -114,74 +121,49 @@ class Field extends PositionComponent
     }
   }
 
-  void fillEmptyField() {
-    List<List<int?>> valueMatrix = List.generate(
-      elementPerRow,
-      (rowIndex) => tiles[rowIndex].map((tile) => tile?.valueId).toList(),
-    );
-    for (int row = 0; row < elementPerRow; row++) {
-      for (int column = 0; column < elementPerRow; column++) {
-        if (tiles[row][column] == null) {
-          int tileValueId = getAvailibleValueId(
-            row,
-            column,
-            valueMatrix,
-            world.valuesNumber,
-            game.random,
-          );
-          Vector2 tilePosition = getTilePosition(row, column, tileSize, true);
-          Tile tile = Tile(
-            size: tileSize,
-            rowIndex: row,
-            columnindex: column,
-            valueId: tileValueId,
-          )..position = tilePosition;
-          add(tile);
-          tiles[row][column] = tile;
-        }
-      }
-    }
-  }
+  List<List<Tile>> currentCombinations = [];
+  bool isAnimating = false;
+  Future<void> makeTurn(Tile firstTile, Tile secondTile) async {
+    if (!firstTile.moveable || !secondTile.moveable) return;
+    swapTiles(firstTile, secondTile);
 
-  Vector2 getTilePosition(int row, int column, Vector2 tileSize, bool center) {
-    double xOffset = center ? tileSize.x / 2 : 0;
-    double yOffset = center ? tileSize.y / 2 : 0;
-    return Vector2(column * tileSize.x + xOffset, row * tileSize.y + yOffset);
-  }
+    List<List<Tile>> combinations = getCombinations(tileMatrix);
 
-  Vector2 getTileSize(Vector2 newFieldSize) {
-    return Vector2(
-      (newFieldSize.x) / elementPerRow,
-      (newFieldSize.y) / elementPerRow,
-    );
-  }
-
-  void onTileTapped(Tile tile) {
-    if (selectedTile == null) {
-      selectedTile = tile;
+    if (combinations.length == currentCombinations.length) {
+      swapTiles(firstTile, secondTile);
     } else {
-      if (areNeighbors(selectedTile!, tile)) {
-        swapTiles(selectedTile!, tile);
-      } else {
-        selectedTile = tile;
+      if (isAnimating) {
+        if (combinations.length > currentCombinations.length) {
+          currentCombinations = combinations;
+          makeUnmoveable(currentCombinations);
+        }
+        return;
       }
+      isAnimating = true;
+      currentCombinations = combinations;
+      while (currentCombinations.isNotEmpty) {
+        makeUnmoveable(currentCombinations);
+        await Future.delayed(
+          Duration(milliseconds: Globals.waitDurationMiliseconds),
+        );
+        removeTiles(currentCombinations);
+        addPoints(currentCombinations);
+        List<int> dropIndexes = await dropTiles();
+        fillEmptyField(dropIndexes);
+        combinations = getCombinations(tileMatrix);
+        currentCombinations = combinations;
+      }
+      isAnimating = false;
     }
-  }
-
-  bool areNeighbors(Tile a, Tile b) {
-    final dx = (a.columnindex - b.columnindex).abs();
-    final dy = (a.rowIndex - b.rowIndex).abs();
-    return (dx + dy) == 1;
+    currentCombinations = [];
   }
 
   void swapTiles(Tile firstTile, Tile secondTile) {
     selectedTile = null;
 
-    if (!firstTile.moveable || !secondTile.moveable) return;
-
     // меняем местами в tiles
-    tiles[firstTile.rowIndex][firstTile.columnindex] = secondTile;
-    tiles[secondTile.rowIndex][secondTile.columnindex] = firstTile;
+    tileMatrix[firstTile.rowIndex][firstTile.columnindex] = secondTile;
+    tileMatrix[secondTile.rowIndex][secondTile.columnindex] = firstTile;
 
     // меняем индексы в тайлах
     int tempRow = firstTile.rowIndex;
@@ -206,24 +188,90 @@ class Field extends PositionComponent
       tileSize,
       true,
     );
-    firstTile.moveable = false;
-    firstTile.add(
+    firstTile.addQueueEffect(
       MoveToEffect(
         firstTarget,
         EffectController(duration: Globals.tilesSwapDuration),
-        onComplete: () => firstTile.moveable = true,
       ),
     );
-    secondTile.moveable = false;
-    secondTile.add(
+    secondTile.addQueueEffect(
       MoveToEffect(
         secondTarget,
         EffectController(duration: Globals.tilesSwapDuration),
-        onComplete: () => secondTile.moveable = true,
       ),
     );
+  }
 
-    // проверка совпадения
+  void fillEmptyField(List<int> dropIndexes) {
+    List<List<int?>> valueMatrix = getValueMatrix();
+    for (int row = 0; row < elementPerRow; row++) {
+      for (int column = 0; column < elementPerRow; column++) {
+        if (tileMatrix[row][column] == null) {
+          // print("$row $column");
+          int tileValueId = getAvailibleValueId(
+            row,
+            column,
+            valueMatrix,
+            world.valuesNumber,
+            game.random,
+          );
+          Vector2 tilePosition = getTilePosition(
+            row - dropIndexes[column],
+            column,
+            tileSize,
+            true,
+          );
+          Tile tile = Tile(
+            size: tileSize,
+            rowIndex: row,
+            columnindex: column,
+            valueId: tileValueId,
+          )..position = tilePosition;
+          dropTile(tile, dropIndexes[column]);
+          drawableField.add(tile);
+          tileMatrix[row][column] = tile;
+        }
+      }
+    }
+  }
+
+  List<List<int?>> getValueMatrix() {
+    List<List<int?>> valueMatrix = List.generate(
+      elementPerRow,
+      (rowIndex) => tileMatrix[rowIndex].map((tile) => tile?.valueId).toList(),
+    );
+    return valueMatrix;
+  }
+
+  Vector2 getTilePosition(int row, int column, Vector2 tileSize, bool center) {
+    double xOffset = center ? tileSize.x / 2 : 0;
+    double yOffset = center ? tileSize.y / 2 : 0;
+    return Vector2(column * tileSize.x + xOffset, row * tileSize.y + yOffset);
+  }
+
+  Vector2 getTileSize(Vector2 newFieldSize) {
+    return Vector2(
+      (newFieldSize.x) / elementPerRow,
+      (newFieldSize.y) / elementPerRow,
+    );
+  }
+
+  void onTileTapped(Tile tile) {
+    if (selectedTile == null) {
+      selectedTile = tile;
+    } else {
+      if (areNeighbors(selectedTile!, tile)) {
+        makeTurn(selectedTile!, tile);
+      } else {
+        selectedTile = tile;
+      }
+    }
+  }
+
+  bool areNeighbors(Tile a, Tile b) {
+    final dx = (a.columnindex - b.columnindex).abs();
+    final dy = (a.rowIndex - b.rowIndex).abs();
+    return (dx + dy) == 1;
   }
 
   void startDrag(Tile tile) {
@@ -237,7 +285,7 @@ class Field extends PositionComponent
 
     final neighbor = getNeighbor(draggedTile!, dir);
     if (neighbor != null) {
-      swapTiles(draggedTile!, neighbor);
+      makeTurn(draggedTile!, neighbor);
     }
 
     draggedTile = null;
@@ -275,7 +323,62 @@ class Field extends PositionComponent
         column < 0) {
       return null;
     }
-    return tiles[row][column];
+    return tileMatrix[row][column];
+  }
+
+  void removeTiles(List<List<Tile>> combinations) {
+    List<Tile> tilesToRemove = combinations.expand((list) => list).toList();
+    for (Tile tile in tilesToRemove) {
+      tileMatrix[tile.rowIndex][tile.columnindex] = null;
+      tile.removeFromGrid();
+    }
+  }
+
+  void addPoints(List<List<Tile>> combinations) {}
+
+  Future<List<int>> dropTiles() async {
+    // в одном цикле массив из количества элементов
+    // и в каждом изначально 0. идем снизу вверх по строкам и добавляем 1 если null,
+    // если не Null - бросаем на количествво клеток в массиве в столбце
+    List<int> dropIndexes = List.generate(tileMatrix[0].length, (_) => 0);
+    for (int rowIndex = tileMatrix.length - 1; rowIndex >= 0; rowIndex--) {
+      for (
+        int columnIndex = 0;
+        columnIndex < tileMatrix[0].length;
+        columnIndex++
+      ) {
+        Tile? tile = tileMatrix[rowIndex][columnIndex];
+        if (tile == null) {
+          dropIndexes[columnIndex]++;
+        } else {
+          tileMatrix[tile.rowIndex][tile.columnindex] = null;
+          int deltaPosition = dropIndexes[columnIndex];
+          tile.rowIndex += deltaPosition;
+          tileMatrix[tile.rowIndex][tile.columnindex] = tile;
+          dropTile(tile, deltaPosition);
+        }
+      }
+    }
+    return dropIndexes;
+  }
+
+  void dropTile(Tile tile, int deltaPosition) {
+    tile.moveable = false;
+    tile.addQueueEffect(
+      MoveToEffect(
+        getTilePosition(tile.rowIndex, tile.columnindex, tileSize, true),
+        EffectController(duration: deltaPosition * Globals.tileDropDuration),
+        onComplete: () => tile.moveable = true,
+      ),
+    );
+  }
+
+  void makeUnmoveable(List<List<Tile>> currentCombinations) {
+    List<Tile> tilesToRemove =
+        currentCombinations.expand((list) => list).toList();
+    for (Tile tile in tilesToRemove) {
+      tile.moveable = false;
+    }
   }
 
   // ПЕРЕДЕЛАТЬ, НЕ РАБОТАЕТ

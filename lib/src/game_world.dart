@@ -4,7 +4,7 @@ import 'package:flutter/material.dart' hide BackButton;
 import 'package:match_3_game/src/components/background_component.dart';
 import 'package:match_3_game/src/components/buttons/back_button.dart'
     show BackButton;
-import 'package:match_3_game/src/field/view/field.dart';
+import 'package:match_3_game/src/field.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
 
@@ -32,7 +32,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
       HomePageBackground(),
       field = Field(
         size: Vector2.all(gameRef.size.x - Globals.fieldOffset * 2),
-        elementPerRow: 9,
+        elementPerRow: 5,
       ),
       BackButton(size: Globals.defaultButtonSize)
         ..position = Globals.defaultButtonSize,

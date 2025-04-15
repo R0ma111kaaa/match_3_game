@@ -1,15 +1,24 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/game_world.dart';
+import 'package:match_3_game/src/globals.dart';
+import 'package:match_3_game/src/mixins/effect_queue.dart';
 
 class Tile extends PositionComponent
-    with HasWorldReference<GameWorld>, TapCallbacks, DragCallbacks {
+    with
+        HasWorldReference<GameWorld>,
+        TapCallbacks,
+        DragCallbacks,
+        EffectQueue {
   int rowIndex;
   int columnindex;
+
   final int valueId;
+  late final RectangleComponent picture;
 
   bool moveable = true;
 
@@ -27,7 +36,7 @@ class Tile extends PositionComponent
     anchor = Anchor.center;
     priority = 10;
     add(
-      RectangleComponent(
+      picture = RectangleComponent(
         paint: Paint()..color = world.tileValues[valueId],
         size: Vector2.all(size.x * 0.7),
         anchor: Anchor.center,
@@ -58,6 +67,18 @@ class Tile extends PositionComponent
       world.field.updateDrag(event.canvasDelta);
       super.onDragUpdate(event);
     }
+  }
+
+  void removeFromGrid() {
+    picture.add(
+      SizeEffect.to(
+        Vector2.zero(),
+        EffectController(duration: Globals.tileRemoveDuration),
+        onComplete: () {
+          removeFromParent();
+        },
+      ),
+    );
   }
 
   // не работает как и в филде
