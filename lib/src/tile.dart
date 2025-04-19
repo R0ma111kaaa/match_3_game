@@ -1,9 +1,12 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
-import 'dart:ui';
+
 import 'package:flame/components.dart';
+import 'dart:ui';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
-import 'package:flutter/material.dart';
+import 'package:flame/flame.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
 import 'package:match_3_game/src/mixins/effect_queue.dart';
@@ -18,7 +21,7 @@ class Tile extends PositionComponent
   int columnindex;
 
   final int valueId;
-  late final RectangleComponent picture;
+  late final SpriteComponent picture;
 
   bool moveable = true;
 
@@ -30,20 +33,23 @@ class Tile extends PositionComponent
   });
 
   @override
-  // прописать получение анимации при инициализации и в зависимости от текущего
-  // уровня анимировать
-  FutureOr<void> onLoad() {
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
+
     anchor = Anchor.center;
     priority = 10;
+
+    Image image = await Flame.images.load(
+      "${world.currentDimension.tileValues[valueId]}.png",
+    );
     add(
-      picture = RectangleComponent(
-        paint: Paint()..color = world.tileValues[valueId],
-        size: Vector2.all(size.x * 0.7),
+      picture = SpriteComponent(
+        sprite: Sprite(image),
+        size: Vector2.all(size.x * Globals.tileIconSizeCoef),
         anchor: Anchor.center,
         position: Vector2(size.x / 2, size.y / 2),
       ),
     );
-    return super.onLoad();
   }
 
   @override

@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
@@ -54,7 +53,7 @@ class Field extends PositionComponent
       Radius.circular(Globals.tileRadius),
     );
     tileSize = getTileSize(size);
-    anchor = Anchor.center;
+    anchor = Anchor.topCenter;
     fillEmptyField(
       List.generate(tileMatrix[0].length, (_) => tileMatrix.length),
     );
@@ -121,41 +120,50 @@ class Field extends PositionComponent
     }
   }
 
-  List<List<Tile>> currentCombinations = [];
+  Future<void> regenerate() async {
+    clear();
+    await Future.delayed(
+      Duration(milliseconds: Globals.waitDurationMiliseconds),
+    );
+    fillEmptyField(
+      List.generate(tileMatrix[0].length, (_) => tileMatrix.length),
+    );
+  }
+
   bool isAnimating = false;
   Future<void> makeTurn(Tile firstTile, Tile secondTile) async {
-    if (!firstTile.moveable || !secondTile.moveable) return;
+    if (isAnimating || !firstTile.moveable || !secondTile.moveable) return;
     swapTiles(firstTile, secondTile);
 
     List<List<Tile>> combinations = getCombinations(tileMatrix);
 
-    if (combinations.length == currentCombinations.length) {
+    if (combinations.isEmpty) {
       swapTiles(firstTile, secondTile);
     } else {
-      if (isAnimating) {
-        if (combinations.length > currentCombinations.length) {
-          currentCombinations = combinations;
-          makeUnmoveable(currentCombinations);
-        }
-        return;
-      }
+      List<int> dropIndexes = [];
       isAnimating = true;
-      currentCombinations = combinations;
-      while (currentCombinations.isNotEmpty) {
-        makeUnmoveable(currentCombinations);
+      while (combinations.isNotEmpty) {
+        makeUnmoveable(combinations);
         await Future.delayed(
           Duration(milliseconds: Globals.waitDurationMiliseconds),
         );
-        removeTiles(currentCombinations);
-        addPoints(currentCombinations);
-        List<int> dropIndexes = await dropTiles();
+        removeTiles(combinations);
+        addPoints(combinations);
+        dropIndexes = await dropTiles();
         fillEmptyField(dropIndexes);
         combinations = getCombinations(tileMatrix);
-        currentCombinations = combinations;
       }
+      await Future.delayed(
+        Duration(
+          milliseconds:
+              (dropIndexes.reduce((a, b) => a > b ? a : b) *
+                      Globals.tileDropDuration *
+                      1000)
+                  .toInt(),
+        ),
+      );
       isAnimating = false;
     }
-    currentCombinations = [];
   }
 
   void swapTiles(Tile firstTile, Tile secondTile) {
@@ -202,19 +210,19 @@ class Field extends PositionComponent
     );
   }
 
-  void fillEmptyField(List<int> dropIndexes) {
+  Future<void> fillEmptyField(List<int> dropIndexes) async {
     List<List<int?>> valueMatrix = getValueMatrix();
     for (int row = 0; row < elementPerRow; row++) {
       for (int column = 0; column < elementPerRow; column++) {
         if (tileMatrix[row][column] == null) {
-          // print("$row $column");
           int tileValueId = getAvailibleValueId(
             row,
             column,
             valueMatrix,
-            world.valuesNumber,
+            world.currentDimension.valueNumber,
             game.random,
           );
+          valueMatrix[row][column] = tileValueId;
           Vector2 tilePosition = getTilePosition(
             row - dropIndexes[column],
             column,
@@ -326,9 +334,10 @@ class Field extends PositionComponent
     return tileMatrix[row][column];
   }
 
-  void removeTiles(List<List<Tile>> combinations) {
-    List<Tile> tilesToRemove = combinations.expand((list) => list).toList();
-    for (Tile tile in tilesToRemove) {
+  void removeTiles(List<List<Tile?>> combinations) {
+    List<Tile?> tilesToRemove = combinations.expand((list) => list).toList();
+    for (Tile? tile in tilesToRemove) {
+      if (tile == null) continue;
       tileMatrix[tile.rowIndex][tile.columnindex] = null;
       tile.removeFromGrid();
     }
@@ -337,9 +346,6 @@ class Field extends PositionComponent
   void addPoints(List<List<Tile>> combinations) {}
 
   Future<List<int>> dropTiles() async {
-    // в одном цикле массив из количества элементов
-    // и в каждом изначально 0. идем снизу вверх по строкам и добавляем 1 если null,
-    // если не Null - бросаем на количествво клеток в массиве в столбце
     List<int> dropIndexes = List.generate(tileMatrix[0].length, (_) => 0);
     for (int rowIndex = tileMatrix.length - 1; rowIndex >= 0; rowIndex--) {
       for (
@@ -362,12 +368,19 @@ class Field extends PositionComponent
     return dropIndexes;
   }
 
-  void dropTile(Tile tile, int deltaPosition) {
+  void dropTile(Tile? tile, int deltaPosition) {
+    if (tile == null) return;
+    if (deltaPosition <= 0) {
+      return;
+    }
     tile.moveable = false;
     tile.addQueueEffect(
       MoveToEffect(
         getTilePosition(tile.rowIndex, tile.columnindex, tileSize, true),
-        EffectController(duration: deltaPosition * Globals.tileDropDuration),
+        EffectController(
+          duration: deltaPosition * Globals.tileDropDuration,
+          curve: Curves.easeInOut,
+        ),
         onComplete: () => tile.moveable = true,
       ),
     );
@@ -381,36 +394,7 @@ class Field extends PositionComponent
     }
   }
 
-  // ПЕРЕДЕЛАТЬ, НЕ РАБОТАЕТ
-  // Future<void> resizeAndMove(
-  //   Vector2 newFieldSize,
-  //   Vector2 newPosition,
-  //   double duration,
-  // ) async {
-  //   addAll([
-  //     SizeEffect.to(
-  //       newFieldSize,
-  //       EffectController(duration: duration, curve: Curves.linear),
-  //     ),
-  //     MoveEffect.to(
-  //       newPosition,
-  //       EffectController(duration: duration, curve: Curves.linear),
-  //     ),
-  //   ]);
-  //   print("first tile size: $tileSize");
-  //   spaceBetweenTiles = getSpaceBetweenTiles(newFieldSize);
-  //   tileSize = getTileSize(newFieldSize);
-  //   print("second tile size: $tileSize");
-  //   for (int row = 0; row < tiles.length; row++) {
-  //     for (int column = 0; column < tiles[row].length; column++) {
-  //       tiles[row][column]?.resizeAndMove(
-  //         tileSize,
-  //         getTilePosition(row, column, tileSize),
-  //         duration,
-  //       );
-  //     }
-  //   }
-
-  //   return;
-  // }
+  void clear() {
+    removeTiles(tileMatrix);
+  }
 }
