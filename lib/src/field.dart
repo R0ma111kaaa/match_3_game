@@ -148,11 +148,13 @@ class Field extends PositionComponent
       List<int> dropIndexes = [];
       isAnimating = true;
       while (combinations.isNotEmpty) {
-        makeUnmoveable(combinations);
+        List<Tile> tilesFromCombinations =
+            (Set<Tile>.from(combinations.expand((el) => el))).toList();
+        makeTilesUnmoveable(tilesFromCombinations);
         await Future.delayed(
           Duration(milliseconds: Globals.waitDurationMiliseconds),
         );
-        removeTiles(combinations);
+        removeTiles(tilesFromCombinations);
         addPoints(combinations);
         dropIndexes = await dropTiles();
         fillEmptyField(dropIndexes);
@@ -339,8 +341,7 @@ class Field extends PositionComponent
     return tileMatrix[row][column];
   }
 
-  void removeTiles(List<List<Tile?>> combinations) {
-    List<Tile?> tilesToRemove = combinations.expand((list) => list).toList();
+  void removeTiles(List<Tile?> tilesToRemove) {
     for (Tile? tile in tilesToRemove) {
       if (tile == null) continue;
       tileMatrix[tile.rowIndex][tile.columnindex] = null;
@@ -348,6 +349,7 @@ class Field extends PositionComponent
     }
   }
 
+  // в BLoC желательно
   void addPoints(List<List<Tile>> combinations) {}
 
   Future<List<int>> dropTiles() async {
@@ -395,15 +397,14 @@ class Field extends PositionComponent
     );
   }
 
-  void makeUnmoveable(List<List<Tile>> currentCombinations) {
-    List<Tile> tilesToRemove =
-        currentCombinations.expand((list) => list).toList();
+  void makeTilesUnmoveable(List<Tile> tilesToRemove) {
     for (Tile tile in tilesToRemove) {
       tile.moveable = false;
     }
   }
 
   void clear() {
-    removeTiles(tileMatrix);
+    List<Tile?> tilesToRemove = tileMatrix.expand((list) => list).toList();
+    removeTiles(tilesToRemove);
   }
 }
