@@ -21,7 +21,7 @@ class Tile extends PositionComponent
   int columnindex;
 
   final int valueId;
-  late final SpriteComponent picture;
+  late SpriteComponent picture;
 
   bool moveable = true;
 
@@ -39,17 +39,7 @@ class Tile extends PositionComponent
     anchor = Anchor.center;
     priority = 10;
 
-    Image image = await Flame.images.load(
-      "${world.currentDimension.tileValues[valueId]}.png",
-    );
-    add(
-      picture = SpriteComponent(
-        sprite: Sprite(image),
-        size: Vector2.all(size.x * Globals.tileIconSizeCoef),
-        anchor: Anchor.center,
-        position: Vector2(size.x / 2, size.y / 2),
-      ),
-    );
+    await reloadPicture(false);
   }
 
   @override
@@ -76,10 +66,10 @@ class Tile extends PositionComponent
   }
 
   void removeFromGrid() {
-    picture.add(
-      SizeEffect.to(
+    add(
+      ScaleEffect.to(
         Vector2.zero(),
-        EffectController(duration: Globals.tileRemoveDuration),
+        EffectController(duration: Globals.tileResizeDuration),
         onComplete: () {
           removeFromParent();
         },
@@ -87,22 +77,20 @@ class Tile extends PositionComponent
     );
   }
 
-  // не работает как и в филде
-  // Future<void> resizeAndMove(
-  //   Vector2 newtileSize,
-  //   Vector2 newPosition,
-  //   double duration,
-  // ) async {
-  //   size = newtileSize;
-  //   addAll([
-  //     SizeEffect.to(
-  //       newPosition,
-  //       EffectController(duration: duration, curve: Curves.linear),
-  //     ),
-  //     MoveEffect.to(
-  //       newPosition,
-  //       EffectController(duration: duration, curve: Curves.linear),
-  //     ),
-  //   ]);
-  // }
+  Future<void> reloadPicture(bool removeOldPicture) async {
+    if (removeOldPicture) {
+      remove(picture);
+    }
+    Image image = await Flame.images.load(
+      "${world.currentDimension.tileValues[valueId]}.png",
+    );
+    SpriteComponent newPicture = SpriteComponent(
+      sprite: Sprite(image),
+      size: Vector2.all(size.x * Globals.tileIconSizeCoef),
+      anchor: Anchor.center,
+      position: Vector2(size.x / 2, size.y / 2),
+    );
+    picture = newPicture;
+    add(picture);
+  }
 }

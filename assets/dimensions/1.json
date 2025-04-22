@@ -7,27 +7,31 @@
         "id": 0,
         "goals": {
             "0": 10
-        }
+        },
+        "tile_types_num": 5
        },{
         "id": 1,
         "goals": {
             "0": 15,
             "1": 15
-        }
+        },
+        "tile_types_num": 5
        },{
         "id": 2,
         "goals": {
             "0": 15,
             "1": 10,
             "2": 10
-        }
+        },
+        "tile_types_num": 5
        },{
         "id": 3,
         "goals": {
             "0": 10,
             "1": 15,
             "2": 30
-        }
+        },
+        "tile_types_num": 5
        }
     ]
 }

@@ -1,15 +1,15 @@
 import 'package:flame/components.dart';
 import 'package:match_3_game/src/components/buttons/default_buttons.dart';
 import 'package:match_3_game/src/game_world.dart';
+import 'package:match_3_game/src/globals.dart';
 
-class DirectionChangerButton extends SimpleButton
+class DimensionChangerButton extends SimpleButton
     with HasWorldReference<GameWorld> {
-  DirectionChangerButton({
-    required super.color,
-    required super.tapColor,
-    required super.size,
-    required this.previous,
-  });
+  DimensionChangerButton({required super.size, required this.previous})
+    : super(
+        color: GameColors.directionChangeButtonColor,
+        tapColor: GameColors.directionChangeTapButtonColor,
+      );
 
   bool previous;
 
@@ -20,10 +20,10 @@ class DirectionChangerButton extends SimpleButton
     action =
         previous
             ? () {
-              world.changeDirection(-1);
+              world.changeDimension(-1);
             }
             : () {
-              world.changeDirection(1);
+              world.changeDimension(1);
             };
   }
 }

@@ -2,8 +2,8 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class Globals {
-  static final int levelsPerRow = 8;
-  static final int tilesPerRow = 4;
+  static final int levelsPerRow = 4;
+  static final int tilesPerRow = 8;
 
   static final int dimensionsCount = 2;
 
@@ -15,7 +15,6 @@ class Globals {
   static final double menuButtonsHeight = (menuHeight - menuButtonsOffset) / 2;
 
   static final double tileRadius = 5;
-  static final double fieldOffset = 10;
   static final double tilePadding = 1;
 
   static final double tileBoxOffsetPadding = 3;
@@ -27,19 +26,24 @@ class Globals {
 
   static final double tileIconSizeCoef = 0.9;
 
-  static final double fieldResizeDuration = 3;
-  static final double fieldSizeCoef = 0.7;
+  static final double fieldResizeDuration = 0.7;
+  static final double fieldMenuSizeCoef = 0.7;
+  static final double fieldSizeCoef = 0.9;
   static final double levelMenuSizeCoef = 0.9;
 
   static final double worldTopOffset = 150;
-  static final double worldLevelMenuOffset = 50;
+  static final double worldLevelMenuOffset = 0;
 
   static final double tilesSwapDuration = 0.2;
-  static final double tileRemoveDuration = 0.2;
+  static final double tileResizeDuration = 0.2;
   static final double tileDropDuration = 0.1;
   static final int waitDurationMiliseconds = 500;
 
+  static final double minDelay = 0.02;
+
   static final Vector2 defaultButtonSize = Vector2.all(50);
+
+  static Curve defaultCurve = Curves.easeInOut;
 }
 
 class GameColors {

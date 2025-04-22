@@ -8,28 +8,39 @@ import 'package:match_3_game/src/globals.dart';
 class LevelMenu extends PositionComponent
     with HasGameRef<Match3Game>, HasWorldReference<GameWorld> {
   late Vector2 levelButtonSize;
-  late int levelNum;
+  List<LevelButton> levelButtons = [];
+  int levelNum = 0;
 
   LevelMenu(size) : super(size: size);
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-
-    levelNum = world.currentDimension.levels.length;
+    anchor = Anchor.topCenter;
     levelButtonSize = getButtonSize();
 
-    anchor = Anchor.topCenter;
+    regenerate();
+  }
 
-    for (int i = 0; i < levelNum; i++) {
-      add(
-        LevelButton(
+  void regenerate() {
+    int previousLevelNum = levelNum;
+    levelNum = world.currentDimension.levels.length;
+
+    int delta = levelNum - previousLevelNum;
+    if (delta < 0) {
+      for (int i = previousLevelNum; i > levelNum; i--) {
+        levelButtons.removeLast().removeFromTheGrid();
+      }
+    } else if (delta > 0) {
+      for (int i = previousLevelNum; i < levelNum; i++) {
+        LevelButton newButton = LevelButton(
           size: levelButtonSize,
           completed: false,
           levelId: i,
-          fontSize: levelButtonSize.x / 2,
-        )..position = getButtonPosition(i),
-      );
+        )..position = getButtonPosition(i);
+        add(newButton);
+        levelButtons.add(newButton);
+      }
     }
   }
 
@@ -37,8 +48,12 @@ class LevelMenu extends PositionComponent
     int row = levelId ~/ Globals.levelsPerRow;
     int column = levelId % Globals.levelsPerRow;
     Vector2 position = Vector2(
-      levelButtonSize.x * (column) + (column + 1) * Globals.levelButtonOffset,
-      levelButtonSize.y * (row) + (row + 1) * Globals.levelButtonOffset,
+      levelButtonSize.x * (column) +
+          (column + 1) * Globals.levelButtonOffset +
+          levelButtonSize.x / 2,
+      levelButtonSize.y * (row) +
+          (row + 1) * Globals.levelButtonOffset +
+          levelButtonSize.y / 2,
     );
     return position;
   }

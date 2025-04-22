@@ -42,7 +42,7 @@ class Field extends PositionComponent
 
   @override
   Future<void> onLoad() async {
-    drawableField = ClipComponent.rectangle(size: size, position: position);
+    drawableField = ClipComponent.rectangle(size: size);
     add(drawableField);
 
     _fieldRrect = RRect.fromLTRBR(
@@ -122,12 +122,17 @@ class Field extends PositionComponent
 
   Future<void> regenerate() async {
     clear();
-    await Future.delayed(
-      Duration(milliseconds: Globals.waitDurationMiliseconds),
-    );
     fillEmptyField(
       List.generate(tileMatrix[0].length, (_) => tileMatrix.length),
     );
+  }
+
+  Future<void> changeDimension() async {
+    for (List<Tile?> row in tileMatrix) {
+      for (Tile? tile in row) {
+        tile?.reloadPicture(true);
+      }
+    }
   }
 
   bool isAnimating = false;
@@ -219,7 +224,7 @@ class Field extends PositionComponent
             row,
             column,
             valueMatrix,
-            world.currentDimension.valueNumber,
+            world.getValueIdRange,
             game.random,
           );
           valueMatrix[row][column] = tileValueId;
@@ -380,6 +385,10 @@ class Field extends PositionComponent
         EffectController(
           duration: deltaPosition * Globals.tileDropDuration,
           curve: Curves.easeInOut,
+          startDelay:
+              Globals.minDelay *
+              ((elementPerRow - tile.columnindex) +
+                  (elementPerRow - tile.rowIndex)),
         ),
         onComplete: () => tile.moveable = true,
       ),

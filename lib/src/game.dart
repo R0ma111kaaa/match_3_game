@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:match_3_game/src/direction.dart';
+import 'package:match_3_game/src/dimension.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
 import 'package:match_3_game/src/pages/autors_page.dart';
@@ -35,7 +35,7 @@ class Match3Game extends FlameGame {
           "home": Route(HomePage.new),
           "settings": Route(SettingsPage.new),
           "autors": Route(AutorsPage.new),
-          "world": WorldRoute(GameWorld.new),
+          "world": WorldRoute(GameWorld.new, maintainState: false),
         },
         initialRoute: "home",
       ),
