@@ -127,14 +127,6 @@ class Field extends PositionComponent
     );
   }
 
-  Future<void> changeDimension() async {
-    for (List<Tile?> row in tileMatrix) {
-      for (Tile? tile in row) {
-        tile?.reloadPicture(true);
-      }
-    }
-  }
-
   bool isAnimating = false;
   Future<void> makeTurn(Tile firstTile, Tile secondTile) async {
     if (isAnimating || !firstTile.moveable || !secondTile.moveable) return;

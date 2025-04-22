@@ -16,6 +16,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   late final LevelMenu levelMenu;
   late final DimensionChangerButton previousDir;
   late final DimensionChangerButton nextDir;
+  late final DimensionBackground background;
 
   bool isMenu = true;
   int? selectedLevel;
@@ -38,6 +39,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
 
     field.regenerate();
     levelMenu.regenerate();
+    background.change();
   }
 
   @override
@@ -45,7 +47,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
     dimensions = gameRef.dimensions;
     currentDimension = dimensions[1];
     addAll([
-      HomePageBackground(),
+      background = DimensionBackground(),
       field =
           Field(
               size: Vector2.all(game.size.x),

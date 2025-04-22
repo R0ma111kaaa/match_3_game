@@ -55,14 +55,14 @@ class IconButton extends SimpleButton {
     required super.tapColor,
     required super.size,
   });
-  late final Image image;
+  late final Sprite sprite;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     add(
       SpriteComponent(
-        sprite: Sprite(image),
+        sprite: sprite,
         anchor: Anchor.center,
         position: Vector2(size.x / 2, size.y / 2),
         size: Vector2(

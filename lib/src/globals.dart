@@ -26,7 +26,6 @@ class Globals {
 
   static final double tileIconSizeCoef = 0.9;
 
-  static final double fieldResizeDuration = 0.7;
   static final double fieldMenuSizeCoef = 0.7;
   static final double fieldSizeCoef = 0.9;
   static final double levelMenuSizeCoef = 0.9;
@@ -34,9 +33,11 @@ class Globals {
   static final double worldTopOffset = 150;
   static final double worldLevelMenuOffset = 0;
 
+  static final double fieldResizeDuration = 0.7;
   static final double tilesSwapDuration = 0.2;
   static final double tileResizeDuration = 0.2;
   static final double tileDropDuration = 0.1;
+  static final double backgroundLoadDuration = 1;
   static final int waitDurationMiliseconds = 500;
 
   static final double minDelay = 0.02;

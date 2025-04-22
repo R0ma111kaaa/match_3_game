@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:match_3_game/src/components/background_component.dart';
 import 'package:match_3_game/src/components/buttons/autors_button.dart';
 import 'package:match_3_game/src/components/buttons/settings_button.dart';
 import 'package:match_3_game/src/components/buttons/start_button_component.dart';
@@ -19,7 +18,6 @@ class HomePage extends Component with HasGameRef<Match3Game> {
       Globals.menuXOffset,
       (gameRef.size.y - menuSize.y) / 2,
     );
-    add(HomePageBackground());
     add(Menu(menuPosition, menuSize));
     return super.onLoad();
   }

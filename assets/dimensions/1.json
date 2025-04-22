@@ -33,5 +33,6 @@
         },
         "tile_types_num": 5
        }
-    ]
+    ],
+    "background_image_filename": "jungles_background.jpg"
 }

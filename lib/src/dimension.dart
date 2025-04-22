@@ -10,6 +10,7 @@ class Dimension {
   late final List<Map<String, dynamic>> levels;
   late final List<String> tileValues;
   late final int valueNumber;
+  late final String backgroundFilename;
 
   Dimension._(this.id);
 
@@ -29,5 +30,6 @@ class Dimension {
     levels = List<Map<String, dynamic>>.from(data["levels"]);
     tileValues = List<String>.from(data["tiles"]);
     valueNumber = tileValues.length;
+    backgroundFilename = data["background_image_filename"];
   }
 }

@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:flame/components.dart';
-import 'package:flame/flame.dart';
 import 'package:match_3_game/src/components/buttons/default_buttons.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
+import 'package:match_3_game/src/sprite_cache.dart';
 
 class BackButton extends IconButton with HasGameRef<Match3Game> {
   BackButton({required super.size})
@@ -11,7 +11,7 @@ class BackButton extends IconButton with HasGameRef<Match3Game> {
 
   @override
   Future<void> onLoad() async {
-    image = await Flame.images.load("back.png");
+    sprite = await SpriteCache.getSprite("back.png");
     action = () => gameRef.router.pop();
     return super.onLoad();
   }
