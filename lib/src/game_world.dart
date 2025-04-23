@@ -5,7 +5,6 @@ import 'package:match_3_game/src/components/background_component.dart';
 import 'package:match_3_game/src/components/buttons/back_button.dart'
     show BackButton;
 import 'package:match_3_game/src/components/buttons/direction_changer_button.dart';
-import 'package:match_3_game/src/dimension.dart';
 import 'package:match_3_game/src/field.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
@@ -21,31 +20,13 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   bool isMenu = true;
   int? selectedLevel;
 
-  late final List<Dimension> dimensions;
-  late Dimension currentDimension;
-
   int get getValueIdRange =>
       isMenu
-          ? currentDimension.valueNumber
-          : currentDimension.levels[selectedLevel!]["tile_types_num"];
-
-  void changeDimension(int delta) {
-    int currentIndex = dimensions.indexOf(currentDimension);
-    int newIndex = (currentIndex + delta) % dimensions.length;
-    if (newIndex < 0) {
-      newIndex += dimensions.length;
-    }
-    currentDimension = dimensions[newIndex];
-
-    field.regenerate();
-    levelMenu.regenerate();
-    background.change();
-  }
+          ? game.currentDimension.valueNumber
+          : game.currentDimension.levels[selectedLevel!]["tile_types_num"];
 
   @override
   Future<void> onLoad() async {
-    dimensions = gameRef.dimensions;
-    currentDimension = dimensions[1];
     addAll([
       background = DimensionBackground(),
       field =
@@ -53,6 +34,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
               size: Vector2.all(game.size.x),
               elementPerRow: Globals.tilesPerRow,
             )
+            ..lock()
             ..scale = Vector2.all(Globals.fieldMenuSizeCoef)
             ..position = Vector2(game.size.x / 2, Globals.worldTopOffset),
       levelMenu = LevelMenu(
@@ -101,6 +83,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   }
 
   Future<void> startLevel(int levelId) async {
+    field.unock();
     field.regenerate();
     isMenu = false;
     selectedLevel = levelId;
@@ -147,5 +130,12 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         onComplete: levelMenu.removeFromParent,
       ),
     );
+  }
+
+  Future<void> changeDimension(int delta) async {
+    game.changeDimension(delta);
+    field.regenerate();
+    levelMenu.regenerate();
+    background.change();
   }
 }

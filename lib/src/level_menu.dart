@@ -24,7 +24,7 @@ class LevelMenu extends PositionComponent
 
   void regenerate() {
     int previousLevelNum = levelNum;
-    levelNum = world.currentDimension.levels.length;
+    levelNum = game.currentDimension.levels.length;
 
     int delta = levelNum - previousLevelNum;
     if (delta < 0) {

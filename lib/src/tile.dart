@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
 import 'package:match_3_game/src/mixins/effect_queue.dart';
@@ -13,6 +14,7 @@ import 'package:match_3_game/src/sprite_cache.dart';
 class Tile extends PositionComponent
     with
         HasWorldReference<GameWorld>,
+        HasGameRef<Match3Game>,
         TapCallbacks,
         DragCallbacks,
         EffectQueue {
@@ -40,7 +42,7 @@ class Tile extends PositionComponent
 
     picture = SpriteComponent(
       sprite: await SpriteCache.getSprite(
-        "${world.currentDimension.tileValues[valueId]}.png",
+        "${gameRef.currentDimension.tileValues[valueId]}.png",
       ),
       size: Vector2.all(size.x * Globals.tileIconSizeCoef),
       anchor: Anchor.center,

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/algorithms/check_combinations.dart';
 import 'package:match_3_game/src/algorithms/get_alailiable_id.dart';
@@ -34,11 +35,14 @@ class Field extends PositionComponent
       Paint()..color = GameColors.tileBackgroundColor;
   final Paint _tileBoxColor = Paint()..color = GameColors.white;
 
+  final InputBlocker blocker;
+
   Field({required super.size, required this.elementPerRow})
     : tileMatrix = List.generate(
         elementPerRow,
         (_) => List.generate(elementPerRow, (_) => null),
-      );
+      ),
+      blocker = InputBlocker(size: size);
 
   @override
   Future<void> onLoad() async {
@@ -395,8 +399,27 @@ class Field extends PositionComponent
     }
   }
 
+  void lock() {
+    add(blocker);
+  }
+
+  void unock() {
+    blocker.removeFromParent();
+  }
+
   void clear() {
     List<Tile?> tilesToRemove = tileMatrix.expand((list) => list).toList();
     removeTiles(tilesToRemove);
+  }
+}
+
+class InputBlocker extends PositionComponent with TapCallbacks {
+  InputBlocker({required super.size}) {
+    priority = 100;
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
   }
 }

@@ -16,6 +16,7 @@ class Match3Game extends FlameGame {
   Random random = Random();
 
   late final List<Dimension> dimensions;
+  late Dimension currentDimension;
 
   // @override
   // bool debugMode = true;
@@ -27,12 +28,13 @@ class Match3Game extends FlameGame {
       (i) => Dimension.create(i),
     );
     dimensions = await Future.wait(futures);
+    currentDimension = dimensions[0];
 
     camera.viewfinder.anchor = Anchor.topLeft;
     addAll([
       router = RouterComponent(
         routes: {
-          "home": Route(HomePage.new),
+          "home": Route(HomePage.new, maintainState: false),
           "settings": Route(SettingsPage.new),
           "autors": Route(AutorsPage.new),
           "world": WorldRoute(GameWorld.new, maintainState: false),
@@ -40,5 +42,14 @@ class Match3Game extends FlameGame {
         initialRoute: "home",
       ),
     ]);
+  }
+
+  void changeDimension(int delta) {
+    int currentIndex = dimensions.indexOf(currentDimension);
+    int newIndex = (currentIndex + delta) % dimensions.length;
+    if (newIndex < 0) {
+      newIndex += dimensions.length;
+    }
+    currentDimension = dimensions[newIndex];
   }
 }
