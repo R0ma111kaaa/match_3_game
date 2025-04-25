@@ -125,6 +125,7 @@ class Field extends PositionComponent
   }
 
   Future<void> regenerate() async {
+    combinations.clear();
     clear();
     fillEmptyField(
       List.generate(tileMatrix[0].length, (_) => tileMatrix.length),
@@ -132,11 +133,12 @@ class Field extends PositionComponent
   }
 
   bool isAnimating = false;
+  List<List<Tile>> combinations = [];
   Future<void> makeTurn(Tile firstTile, Tile secondTile) async {
     if (isAnimating || !firstTile.moveable || !secondTile.moveable) return;
     swapTiles(firstTile, secondTile);
 
-    List<List<Tile>> combinations = getCombinations(tileMatrix);
+    combinations = getCombinations(tileMatrix);
 
     if (combinations.isEmpty) {
       swapTiles(firstTile, secondTile);
@@ -150,18 +152,22 @@ class Field extends PositionComponent
         await Future.delayed(
           Duration(milliseconds: Globals.waitDurationMiliseconds),
         );
-        removeTiles(tilesFromCombinations);
-        addPoints(combinations);
-        dropIndexes = await dropTiles();
-        fillEmptyField(dropIndexes);
-        combinations = getCombinations(tileMatrix);
+        if (combinations.isNotEmpty) {
+          removeTiles(tilesFromCombinations);
+          addPoints(combinations);
+          dropIndexes = await dropTiles();
+          fillEmptyField(dropIndexes);
+          combinations = getCombinations(tileMatrix);
+        }
       }
       await Future.delayed(
         Duration(
           milliseconds:
-              (dropIndexes.reduce((a, b) => a > b ? a : b) *
-                      Globals.tileDropDuration *
-                      1000)
+              (dropIndexes.isNotEmpty
+                      ? dropIndexes.reduce((a, b) => a > b ? a : b) *
+                          Globals.tileDropDuration *
+                          1000
+                      : 0)
                   .toInt(),
         ),
       );
@@ -413,13 +419,25 @@ class Field extends PositionComponent
   }
 }
 
-class InputBlocker extends PositionComponent with TapCallbacks {
+class InputBlocker extends PositionComponent with TapCallbacks, DragCallbacks {
   InputBlocker({required super.size}) {
     priority = 100;
   }
 
   @override
   void onTapDown(TapDownEvent event) {
+    event.handled = true;
     super.onTapDown(event);
+  }
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    event.handled = true;
+    super.onDragStart(event);
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    event.handled = true;
   }
 }

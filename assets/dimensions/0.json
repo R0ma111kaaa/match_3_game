@@ -1,5 +1,6 @@
 {
     "title": "jungles",
+    "colors": ["#4B0082", "#FF0000", "#FFFFFF", "#000000", "#FF69B4"],
     "tiles": ["youtube", "inst", "bybit", "apple", "mac", "x"],
     "levels":
     [

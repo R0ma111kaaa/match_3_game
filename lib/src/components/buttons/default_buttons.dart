@@ -19,6 +19,7 @@ class SimpleButton extends PositionComponent with TapCallbacks {
   late final RRect _rrect;
   late final Paint _paint;
   late void Function() action;
+  bool locked = false;
 
   @override
   Future<void> onLoad() async {
@@ -40,12 +41,22 @@ class SimpleButton extends PositionComponent with TapCallbacks {
   @override
   void onTapUp(TapUpEvent event) {
     _paint.color = color;
-    action();
+    if (!locked) {
+      action();
+    }
   }
 
   @override
   void onTapCancel(TapCancelEvent event) {
     _paint.color = color;
+  }
+
+  void lock() {
+    locked = true;
+  }
+
+  void unlock() {
+    locked = false;
   }
 }
 

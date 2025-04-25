@@ -34,7 +34,6 @@ class GameWorld extends World with HasGameRef<Match3Game> {
               size: Vector2.all(game.size.x),
               elementPerRow: Globals.tilesPerRow,
             )
-            ..lock()
             ..scale = Vector2.all(Globals.fieldMenuSizeCoef)
             ..position = Vector2(game.size.x / 2, Globals.worldTopOffset),
       levelMenu = LevelMenu(
@@ -83,7 +82,6 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   }
 
   Future<void> startLevel(int levelId) async {
-    field.unock();
     field.regenerate();
     isMenu = false;
     selectedLevel = levelId;
@@ -100,6 +98,10 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         ),
       ),
     ]);
+
+    nextDir.lock();
+    previousDir.lock();
+
     nextDir.add(
       MoveEffect.to(
         Vector2(game.size.x + nextDir.size.x / 2, nextDir.position.y),
@@ -130,6 +132,9 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         onComplete: levelMenu.removeFromParent,
       ),
     );
+    for (final button in levelMenu.levelButtons) {
+      button.lock();
+    }
   }
 
   Future<void> changeDimension(int delta) async {
