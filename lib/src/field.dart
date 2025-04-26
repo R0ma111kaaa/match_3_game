@@ -4,10 +4,10 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/algorithms/check_combinations.dart';
 import 'package:match_3_game/src/algorithms/get_alailiable_id.dart';
+import 'package:match_3_game/src/components/input_blocker.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
@@ -46,6 +46,8 @@ class Field extends PositionComponent
 
   @override
   Future<void> onLoad() async {
+    lock();
+    priority = 20;
     drawableField = ClipComponent.rectangle(size: size);
     add(drawableField);
 
@@ -153,8 +155,7 @@ class Field extends PositionComponent
           Duration(milliseconds: Globals.waitDurationMiliseconds),
         );
         if (combinations.isNotEmpty) {
-          removeTiles(tilesFromCombinations);
-          addPoints(combinations);
+          removeTilesAndAddPoints(tilesFromCombinations, true);
           dropIndexes = await dropTiles();
           fillEmptyField(dropIndexes);
           combinations = getCombinations(tileMatrix);
@@ -343,16 +344,30 @@ class Field extends PositionComponent
     return tileMatrix[row][column];
   }
 
-  void removeTiles(List<Tile?> tilesToRemove) {
+  Future<void> removeTilesAndAddPoints(
+    List<Tile?> tilesToRemove,
+    bool addPoints,
+  ) async {
     for (Tile? tile in tilesToRemove) {
       if (tile == null) continue;
-      tileMatrix[tile.rowIndex][tile.columnindex] = null;
+      int id = tile.valueId;
+      if (addPoints &&
+          id < world.scores.scoringPoints.length &&
+          (world.scores.scoringPoints[id]["needed"]! >
+              world.scores.scoringPoints[id]["completed"]!)) {
+        world.scores.scores[tile.valueId].updateScore(1);
+        if (world.scores.isLevelCompleted()) {
+          lock();
+          await Future.delayed(
+            Duration(milliseconds: Globals.waitDurationMiliseconds * 3),
+          );
+          game.router.pushNamed("win");
+        }
+      }
       tile.removeFromGrid();
+      tileMatrix[tile.rowIndex][tile.columnindex] = null;
     }
   }
-
-  // в BLoC желательно
-  void addPoints(List<List<Tile>> combinations) {}
 
   Future<List<int>> dropTiles() async {
     List<int> dropIndexes = List.generate(tileMatrix[0].length, (_) => 0);
@@ -415,29 +430,6 @@ class Field extends PositionComponent
 
   void clear() {
     List<Tile?> tilesToRemove = tileMatrix.expand((list) => list).toList();
-    removeTiles(tilesToRemove);
-  }
-}
-
-class InputBlocker extends PositionComponent with TapCallbacks, DragCallbacks {
-  InputBlocker({required super.size}) {
-    priority = 100;
-  }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    event.handled = true;
-    super.onTapDown(event);
-  }
-
-  @override
-  void onDragStart(DragStartEvent event) {
-    event.handled = true;
-    super.onDragStart(event);
-  }
-
-  @override
-  void onDragUpdate(DragUpdateEvent event) {
-    event.handled = true;
+    removeTilesAndAddPoints(tilesToRemove, false);
   }
 }

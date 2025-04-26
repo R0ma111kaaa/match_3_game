@@ -37,7 +37,9 @@ class Globals {
   static final double tilesSwapDuration = 0.2;
   static final double tileResizeDuration = 0.2;
   static final double tileDropDuration = 0.1;
+  static final double tileMoveToGoalDuraion = 2;
   static final double backgroundLoadDuration = 1;
+  static final double stringsResizeDuration = 0.5;
   static final int waitDurationMiliseconds = 500;
 
   static final double minDelay = 0.02;
@@ -45,6 +47,10 @@ class Globals {
   static final Vector2 defaultButtonSize = Vector2.all(50);
 
   static Curve defaultCurve = Curves.easeInOut;
+
+  static double scoreTextHeight = 50;
+  static double maxScorePictureHeight = 50;
+  static double scoresPaddingCoef = 0.2;
 }
 
 class GameColors {
@@ -53,6 +59,8 @@ class GameColors {
   static final Color red = Colors.red;
   static final Color green = Colors.green;
   static final Color white = Colors.white;
+
+  static final Color transparentBackground = Color.fromARGB(150, 0, 0, 0);
 
   static final Color fieldColor = const Color.fromARGB(255, 12, 32, 47);
   static final Color tileBackgroundColor = const Color.fromRGBO(19, 53, 78, 1);

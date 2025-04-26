@@ -16,7 +16,6 @@ class LevelButton extends TextButton with HasWorldReference<GameWorld> {
          color: GameColors.uncompletedLevelColor,
          tapColor: GameColors.red,
          textString: levelId.toString(),
-         fontSize: size.x / 2,
        );
 
   @override

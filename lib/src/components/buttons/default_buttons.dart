@@ -91,11 +91,9 @@ class TextButton extends SimpleButton {
     required super.color,
     required super.tapColor,
     required super.size,
-    this.fontSize = 50,
   });
   final String textString;
   late final TextComponent text;
-  final double fontSize;
 
   @override
   Future<void> onLoad() async {
@@ -104,7 +102,7 @@ class TextButton extends SimpleButton {
     text = TextComponent(
       text: textString,
       textRenderer: TextPaint(
-        style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: size.x / 4, fontWeight: FontWeight.bold),
       ),
       anchor: Anchor.center,
       position: Vector2(size.x / 2, size.y / 2),

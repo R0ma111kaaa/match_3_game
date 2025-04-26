@@ -8,6 +8,7 @@ import 'package:match_3_game/src/components/buttons/direction_changer_button.dar
 import 'package:match_3_game/src/field.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
+import 'package:match_3_game/src/level_components/scores.dart';
 import 'package:match_3_game/src/level_menu.dart';
 
 class GameWorld extends World with HasGameRef<Match3Game> {
@@ -16,6 +17,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   late final DimensionChangerButton previousDir;
   late final DimensionChangerButton nextDir;
   late final DimensionBackground background;
+  late final Scores scores;
 
   bool isMenu = true;
   int? selectedLevel;
@@ -82,6 +84,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   }
 
   Future<void> startLevel(int levelId) async {
+    field.unock();
     field.regenerate();
     isMenu = false;
     selectedLevel = levelId;
@@ -135,6 +138,12 @@ class GameWorld extends World with HasGameRef<Match3Game> {
     for (final button in levelMenu.levelButtons) {
       button.lock();
     }
+
+    add(
+      scores = Scores(
+        List<int>.from(game.currentDimension.levels[levelId]["goals"]),
+      ),
+    );
   }
 
   Future<void> changeDimension(int delta) async {
