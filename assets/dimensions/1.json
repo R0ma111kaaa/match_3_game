@@ -1,5 +1,6 @@
 {
     "title": "water",
+    "colors": ["#FFAA4382", "#FF8800FF", "#FFFFFFFF", "#FF000000", "#FFFF69B4"],
     "tiles": ["box", "burger", "casino", "cold_face", "duck_mr_bim", "gift", "skeleton"],
     "levels": [
         { "id": 0, "goals": [40, 20, 30, 10, 90, 10, 90], "tile_types_num": 7 },
@@ -7,7 +8,7 @@
             "id": 1,
             "goals": [15, 15],
             "tile_types_num": 5
-        },
+        },  
         {
             "id": 2,
             "goals": [15, 10, 10],

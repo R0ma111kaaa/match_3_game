@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
@@ -46,7 +47,7 @@ class EndScreenPage extends PositionComponent
 
   @override
   void onTapDown(TapDownEvent event) {
-    game.router.popUntilNamed("home");
+    game.router.pushReplacementNamed("home");
     event.handled = true;
     super.onTapDown(event);
   }
@@ -65,8 +66,20 @@ class EndScreenPage extends PositionComponent
 
 class WinPage extends EndScreenPage {
   WinPage() : super(text: "Уровень пройден");
+
+  @override
+  Future<void> onLoad() async {
+    FlameAudio.play('win.mp3');
+    return super.onLoad();
+  }
 }
 
 class LosePage extends EndScreenPage {
   LosePage() : super(text: "Ты проиграл чувачек");
+
+  @override
+  Future<void> onLoad() async {
+    FlameAudio.play('lose.mp3');
+    return super.onLoad();
+  }
 }

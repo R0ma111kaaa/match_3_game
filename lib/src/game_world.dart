@@ -42,7 +42,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         Vector2(game.size.x * Globals.levelMenuSizeCoef, 0),
       ),
       BackButton(size: Globals.defaultButtonSize)
-        ..position = Vector2(10, Globals.defaultButtonSize.y),
+        ..position = Globals.defaultButtonSize,
       previousDir = DimensionChangerButton(
         size: Vector2(
           (game.size.x - field.size.x * field.scale.x) /

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
-import 'package:match_3_game/src/sprite_cache.dart';
+import 'package:match_3_game/src/tools/sprite_cache.dart';
 
 class Scores extends PositionComponent
     with HasGameRef<Match3Game>, HasWorldReference<GameWorld> {

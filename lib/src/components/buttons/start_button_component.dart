@@ -13,7 +13,7 @@ class StartButton extends TextButton with HasGameRef<Match3Game> {
 
   @override
   Future<void> onLoad() {
-    action = () => gameRef.router.pushNamed("world");
+    action = () => gameRef.router.pushReplacementNamed("world");
     return super.onLoad();
   }
 }

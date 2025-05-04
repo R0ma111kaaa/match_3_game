@@ -1,6 +1,6 @@
 {
     "title": "jungles",
-    "colors": ["#4B0082", "#FF0000", "#FFFFFF", "#000000", "#FF69B4"],
+    "colors": ["#FF4B0082", "#FF0000FF", "#FFFFFFFF", "#FF000000", "#FFFF69B4"],
     "tiles": ["youtube", "inst", "bybit", "apple", "mac", "x"],
     "levels": [
         { "id": 0, "goals": [1], "tile_types_num": 5 },

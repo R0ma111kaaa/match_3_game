@@ -11,6 +11,7 @@ class Dimension {
   late final List<String> tileValues;
   late final int valueNumber;
   late final String backgroundFilename;
+  late final List<Color> colors;
 
   Dimension._(this.id);
 
@@ -31,5 +32,11 @@ class Dimension {
     tileValues = List<String>.from(data["tiles"]);
     valueNumber = tileValues.length;
     backgroundFilename = data["background_image_filename"];
+
+    List<String> colorStrings = List<String>.from(data["colors"]);
+    colors = List<Color>.generate(
+      colorStrings.length,
+      (i) => Color(int.parse(colorStrings[i].replaceFirst('#', ''), radix: 16)),
+    );
   }
 }

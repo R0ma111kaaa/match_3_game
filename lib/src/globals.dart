@@ -2,12 +2,13 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class Globals {
-  static final int levelsPerRow = 4;
+  static final int levelsPerRow = 6;
   static final int tilesPerRow = 8;
 
   static final int dimensionsCount = 2;
 
   static final double buttonIconSizeCoef = 0.7;
+  static final double buttonScaleCoef = 0.9;
 
   static final double menuXOffset = 50;
   static final double menuHeight = 200;
@@ -29,6 +30,7 @@ class Globals {
   static final double fieldMenuSizeCoef = 0.7;
   static final double fieldSizeCoef = 0.9;
   static final double levelMenuSizeCoef = 0.9;
+  static final double baseCoef = 0.8;
 
   static final double worldTopOffset = 150;
   static final double worldLevelMenuOffset = 0;
@@ -51,6 +53,14 @@ class Globals {
   static double scoreTextHeight = 50;
   static double maxScorePictureHeight = 50;
   static double scoresPaddingCoef = 0.2;
+
+  static List<String> authors = [
+    "Авторы: ",
+    "Григорьев Роман ФИТ-241",
+    "Вразовский Иван МО-241",
+    "Фролов Александр СОШ №106",
+    "Андрейчкиков Александр СОШ №96",
+  ];
 }
 
 class GameColors {

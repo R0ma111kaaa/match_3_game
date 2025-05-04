@@ -10,6 +10,7 @@ import 'package:match_3_game/src/pages/autors_page.dart';
 import 'package:match_3_game/src/pages/end_screens.dart';
 import 'package:match_3_game/src/pages/home_page.dart';
 import 'package:match_3_game/src/pages/settings_page.dart';
+import 'package:match_3_game/src/tools/storage.dart';
 
 class Match3Game extends FlameGame {
   late final RouterComponent router;
@@ -29,18 +30,19 @@ class Match3Game extends FlameGame {
       (i) => Dimension.create(i),
     );
     dimensions = await Future.wait(futures);
-    currentDimension = dimensions[0];
+    int dimensionIndex = await Storage.loadDimension();
+    currentDimension = dimensions[dimensionIndex];
 
     camera.viewfinder.anchor = Anchor.topLeft;
     addAll([
       router = RouterComponent(
         routes: {
           "home": Route(HomePage.new, maintainState: false),
-          "settings": Route(SettingsPage.new),
-          "autors": Route(AutorsPage.new),
+          "settings": Route(SettingsPage.new, maintainState: false),
+          "autors": Route(AutorsPage.new, maintainState: false),
           "world": WorldRoute(GameWorld.new, maintainState: false),
-          "win": Route(WinPage.new),
-          "lose": Route(LosePage.new),
+          "win": Route(WinPage.new, maintainState: false),
+          "lose": Route(LosePage.new, maintainState: false),
         },
         initialRoute: "home",
       ),
@@ -54,5 +56,6 @@ class Match3Game extends FlameGame {
       newIndex += dimensions.length;
     }
     currentDimension = dimensions[newIndex];
+    Storage.saveDimension(newIndex);
   }
 }

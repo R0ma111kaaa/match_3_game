@@ -9,7 +9,7 @@ import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
 import 'package:match_3_game/src/mixins/effect_queue.dart';
-import 'package:match_3_game/src/sprite_cache.dart';
+import 'package:match_3_game/src/tools/sprite_cache.dart';
 
 class Tile extends PositionComponent
     with

@@ -12,11 +12,9 @@ class LevelButton extends TextButton with HasWorldReference<GameWorld> {
     required super.size,
     required this.levelId,
     required this.completed,
-  }) : super(
-         color: GameColors.uncompletedLevelColor,
-         tapColor: GameColors.red,
-         textString: levelId.toString(),
-       );
+    required super.color,
+    required super.tapColor,
+  }) : super(textString: levelId.toString());
 
   @override
   Future<void> onLoad() async {
