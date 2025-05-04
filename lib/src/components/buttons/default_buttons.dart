@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/extensions.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/rendering.dart';
+import 'package:match_3_game/src/audio_service.dart';
 import 'package:match_3_game/src/globals.dart';
 
 class SimpleButton extends PositionComponent with TapCallbacks {
@@ -46,7 +46,7 @@ class SimpleButton extends PositionComponent with TapCallbacks {
     scale = Vector2(1, 1);
     if (!locked) {
       action();
-      FlameAudio.play('digital_click.wav');
+      AudioService().playClick();
     }
   }
 

@@ -42,7 +42,7 @@ class Tile extends PositionComponent
 
     picture = SpriteComponent(
       sprite: await SpriteCache.getSprite(
-        "${gameRef.currentDimension.tileValues[valueId]}.png",
+        "${gameRef.currentDimension.tileValues[valueId]}_tile.png",
       ),
       size: Vector2.all(size.x * Globals.tileIconSizeCoef),
       anchor: Anchor.center,
@@ -85,34 +85,4 @@ class Tile extends PositionComponent
       ),
     );
   }
-
-  // void moveToGoal() {
-  //   removeFromParent();
-  //   position = absolutePosition;
-  //   world.add(this);
-  //   addAll([
-  //     ScaleEffect.to(
-  //       Vector2.all(1 / Globals.fieldSizeCoef),
-  //       EffectController(duration: Globals.tileMoveToGoalDuraion),
-  //     ),
-  //     MoveToEffect(
-  //       world.scores.getScoreGlobalPosition(valueId),
-  //       EffectController(
-  //         duration: Globals.tileMoveToGoalDuraion,
-  //         curve: Globals.defaultCurve,
-  //       ),
-  //       onComplete: () {
-  //         removeFromParent();
-  //         world.scores.scores[valueId].updateScore(1);
-  //       },
-  //     ),
-  //     SizeEffect.to(
-  //       world.scores.pictureSize,
-  //       EffectController(
-  //         duration: Globals.tileMoveToGoalDuraion,
-  //         curve: Globals.defaultCurve,
-  //       ),
-  //     ),
-  //   ]);
-  // }
 }

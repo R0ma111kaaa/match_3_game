@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
-import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
+import 'package:match_3_game/src/audio_service.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
 
@@ -28,7 +28,13 @@ class EndScreenPage extends PositionComponent
         text: text,
         anchor: Anchor.center,
         position: size / 2,
-        textRenderer: TextPaint(style: TextStyle(fontSize: size.x / 10)),
+        textRenderer: TextPaint(
+          style: TextStyle(
+            fontSize: size.x / 10,
+            fontWeight: FontWeight.bold,
+            fontFamily: "RuneScape",
+          ),
+        ),
       )..add(
         SequenceEffect([
           ScaleEffect.to(
@@ -69,17 +75,17 @@ class WinPage extends EndScreenPage {
 
   @override
   Future<void> onLoad() async {
-    FlameAudio.play('win.mp3');
+    AudioService().playWin();
     return super.onLoad();
   }
 }
 
 class LosePage extends EndScreenPage {
-  LosePage() : super(text: "Ты проиграл чувачек");
+  LosePage() : super(text: "Ты проиграл");
 
   @override
   Future<void> onLoad() async {
-    FlameAudio.play('lose.mp3');
+    AudioService().playLose();
     return super.onLoad();
   }
 }

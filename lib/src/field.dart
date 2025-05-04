@@ -7,6 +7,7 @@ import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/algorithms/check_combinations.dart';
 import 'package:match_3_game/src/algorithms/get_alailiable_id.dart';
+import 'package:match_3_game/src/audio_service.dart';
 import 'package:match_3_game/src/components/input_blocker.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
@@ -36,6 +37,9 @@ class Field extends PositionComponent
   final Paint _tileBoxColor = Paint()..color = GameColors.white;
 
   final InputBlocker blocker;
+
+  bool isLose = false;
+  bool isWin = false;
 
   Field({required super.size, required this.elementPerRow})
     : tileMatrix = List.generate(
@@ -145,6 +149,7 @@ class Field extends PositionComponent
     if (combinations.isEmpty) {
       swapTiles(firstTile, secondTile);
     } else {
+      isLose = world.turnsCounter.increment();
       List<int> dropIndexes = [];
       isAnimating = true;
       while (combinations.isNotEmpty) {
@@ -160,6 +165,12 @@ class Field extends PositionComponent
           fillEmptyField(dropIndexes);
           combinations = getCombinations(tileMatrix);
         }
+      }
+      if (isLose && !isWin) {
+        game.router.pushNamed("lose");
+        return;
+      } else if (isWin) {
+        return;
       }
       await Future.delayed(
         Duration(
@@ -178,6 +189,8 @@ class Field extends PositionComponent
 
   void swapTiles(Tile firstTile, Tile secondTile) {
     selectedTile = null;
+
+    AudioService().playWhoosh();
 
     // меняем местами в tiles
     tileMatrix[firstTile.rowIndex][firstTile.columnindex] = secondTile;
@@ -348,6 +361,9 @@ class Field extends PositionComponent
     List<Tile?> tilesToRemove,
     bool addPoints,
   ) async {
+    if (!world.isMenu) {
+      AudioService().playDrop();
+    }
     for (Tile? tile in tilesToRemove) {
       if (tile == null) continue;
       int id = tile.valueId;
@@ -362,6 +378,7 @@ class Field extends PositionComponent
             Duration(milliseconds: Globals.waitDurationMiliseconds * 3),
           );
           game.router.pushNamed("win");
+          isWin = true;
         }
       }
       tile.removeFromGrid();

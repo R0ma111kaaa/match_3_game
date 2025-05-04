@@ -125,14 +125,20 @@ class Score extends PositionComponent with HasGameRef<Match3Game> {
   @override
   Future<void> onLoad() async {
     text = TextComponent(
-      textRenderer: TextPaint(style: TextStyle(fontSize: size.x / 3)),
+      textRenderer: TextPaint(
+        style: TextStyle(
+          fontSize: size.x / 3,
+          fontWeight: FontWeight.bold,
+          fontFamily: "RuneScape",
+        ),
+      ),
     );
     updateScore(0);
 
     addAll([
       SpriteComponent(
         sprite: await SpriteCache.getSprite(
-          "${game.currentDimension.tileValues[id]}.png",
+          "${game.currentDimension.tileValues[id]}_tile.png",
         ),
         size: pictureSize,
       ),

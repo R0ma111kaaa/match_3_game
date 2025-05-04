@@ -34,7 +34,7 @@ class DimensionBackground extends Component
 
   Future<void> _load([bool animate = false]) async {
     Sprite sprite = await SpriteCache.getSprite(
-      game.currentDimension.backgroundFilename,
+      "${game.currentDimension.backgroundFilename}_background.jpg",
     );
     backgroundSprite = SpriteComponent(sprite: sprite, size: gameRef.size);
     if (animate) {

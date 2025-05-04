@@ -5,7 +5,7 @@ class Globals {
   static final int levelsPerRow = 6;
   static final int tilesPerRow = 8;
 
-  static final int dimensionsCount = 2;
+  static final int dimensionsCount = 3;
 
   static final double buttonIconSizeCoef = 0.7;
   static final double buttonScaleCoef = 0.9;
@@ -61,6 +61,7 @@ class Globals {
     "Фролов Александр СОШ №106",
     "Андрейчкиков Александр СОШ №96",
   ];
+  static String turnCounterText = "Осталось ходов: ";
 }
 
 class GameColors {

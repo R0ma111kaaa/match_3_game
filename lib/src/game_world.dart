@@ -9,6 +9,7 @@ import 'package:match_3_game/src/field.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
 import 'package:match_3_game/src/level_components/scores.dart';
+import 'package:match_3_game/src/level_components/turns_counter.dart';
 import 'package:match_3_game/src/level_menu.dart';
 
 class GameWorld extends World with HasGameRef<Match3Game> {
@@ -18,6 +19,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   late final DimensionChangerButton nextDir;
   late final DimensionBackground background;
   late final Scores scores;
+  late final TurnsCounter turnsCounter;
 
   bool isMenu = true;
   int? selectedLevel;
@@ -139,11 +141,20 @@ class GameWorld extends World with HasGameRef<Match3Game> {
       button.lock();
     }
 
-    add(
+    addAll([
+      turnsCounter =
+          TurnsCounter(game.currentDimension.levels[levelId]["turns"].toInt())
+            ..position = Vector2(game.size.x / 2, -100)
+            ..add(
+              MoveToEffect(
+                Vector2(game.size.x / 2, 100),
+                EffectController(duration: Globals.fieldResizeDuration),
+              ),
+            ),
       scores = Scores(
         List<int>.from(game.currentDimension.levels[levelId]["goals"]),
       ),
-    );
+    ]);
   }
 
   Future<void> changeDimension(int delta) async {
