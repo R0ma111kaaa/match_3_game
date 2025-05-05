@@ -5,10 +5,11 @@ import 'package:match_3_game/src/components/background_component.dart';
 import 'package:match_3_game/src/components/buttons/back_button.dart'
     show BackButton;
 import 'package:match_3_game/src/components/buttons/direction_changer_button.dart';
-import 'package:match_3_game/src/dimension.dart';
 import 'package:match_3_game/src/field.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/globals.dart';
+import 'package:match_3_game/src/level_components/scores.dart';
+import 'package:match_3_game/src/level_components/turns_counter.dart';
 import 'package:match_3_game/src/level_menu.dart';
 
 class GameWorld extends World with HasGameRef<Match3Game> {
@@ -16,36 +17,22 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   late final LevelMenu levelMenu;
   late final DimensionChangerButton previousDir;
   late final DimensionChangerButton nextDir;
+  late final DimensionBackground background;
+  late final Scores scores;
+  late final TurnsCounter turnsCounter;
 
   bool isMenu = true;
   int? selectedLevel;
 
-  late final List<Dimension> dimensions;
-  late Dimension currentDimension;
-
   int get getValueIdRange =>
       isMenu
-          ? currentDimension.valueNumber
-          : currentDimension.levels[selectedLevel!]["tile_types_num"];
-
-  void changeDimension(int delta) {
-    int currentIndex = dimensions.indexOf(currentDimension);
-    int newIndex = (currentIndex + delta) % dimensions.length;
-    if (newIndex < 0) {
-      newIndex += dimensions.length;
-    }
-    currentDimension = dimensions[newIndex];
-
-    field.regenerate();
-    levelMenu.regenerate();
-  }
+          ? game.currentDimension.valueNumber
+          : game.currentDimension.levels[selectedLevel!]["tile_types_num"];
 
   @override
   Future<void> onLoad() async {
-    dimensions = gameRef.dimensions;
-    currentDimension = dimensions[1];
     addAll([
-      HomePageBackground(),
+      background = DimensionBackground(),
       field =
           Field(
               size: Vector2.all(game.size.x),
@@ -57,7 +44,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         Vector2(game.size.x * Globals.levelMenuSizeCoef, 0),
       ),
       BackButton(size: Globals.defaultButtonSize)
-        ..position = Vector2(10, Globals.defaultButtonSize.y),
+        ..position = Globals.defaultButtonSize,
       previousDir = DimensionChangerButton(
         size: Vector2(
           (game.size.x - field.size.x * field.scale.x) /
@@ -99,6 +86,7 @@ class GameWorld extends World with HasGameRef<Match3Game> {
   }
 
   Future<void> startLevel(int levelId) async {
+    field.unock();
     field.regenerate();
     isMenu = false;
     selectedLevel = levelId;
@@ -115,6 +103,10 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         ),
       ),
     ]);
+
+    nextDir.lock();
+    previousDir.lock();
+
     nextDir.add(
       MoveEffect.to(
         Vector2(game.size.x + nextDir.size.x / 2, nextDir.position.y),
@@ -145,5 +137,30 @@ class GameWorld extends World with HasGameRef<Match3Game> {
         onComplete: levelMenu.removeFromParent,
       ),
     );
+    for (final button in levelMenu.levelButtons) {
+      button.lock();
+    }
+
+    addAll([
+      turnsCounter =
+          TurnsCounter(game.currentDimension.levels[levelId]["turns"].toInt())
+            ..position = Vector2(game.size.x / 2, -100)
+            ..add(
+              MoveToEffect(
+                Vector2(game.size.x / 2, 100),
+                EffectController(duration: Globals.fieldResizeDuration),
+              ),
+            ),
+      scores = Scores(
+        List<int>.from(game.currentDimension.levels[levelId]["goals"]),
+      ),
+    ]);
+  }
+
+  Future<void> changeDimension(int delta) async {
+    game.changeDimension(delta);
+    field.regenerate();
+    levelMenu.regenerate();
+    background.change();
   }
 }

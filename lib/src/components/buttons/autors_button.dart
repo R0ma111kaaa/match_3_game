@@ -13,7 +13,7 @@ class AutorsButton extends TextButton with HasGameRef<Match3Game> {
 
   @override
   Future<void> onLoad() {
-    action = () => gameRef.router.pushNamed("autors");
+    action = () => gameRef.router.pushReplacementNamed("autors");
     return super.onLoad();
   }
 }

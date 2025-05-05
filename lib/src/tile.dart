@@ -3,17 +3,18 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'dart:ui';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
-import 'package:flame/flame.dart';
+import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
 import 'package:match_3_game/src/mixins/effect_queue.dart';
+import 'package:match_3_game/src/tools/sprite_cache.dart';
 
 class Tile extends PositionComponent
     with
         HasWorldReference<GameWorld>,
+        HasGameRef<Match3Game>,
         TapCallbacks,
         DragCallbacks,
         EffectQueue {
@@ -39,7 +40,15 @@ class Tile extends PositionComponent
     anchor = Anchor.center;
     priority = 10;
 
-    await reloadPicture(false);
+    picture = SpriteComponent(
+      sprite: await SpriteCache.getSprite(
+        "${gameRef.currentDimension.tileValues[valueId]}_tile.png",
+      ),
+      size: Vector2.all(size.x * Globals.tileIconSizeCoef),
+      anchor: Anchor.center,
+      position: Vector2(size.x / 2, size.y / 2),
+    );
+    add(picture);
   }
 
   @override
@@ -75,22 +84,5 @@ class Tile extends PositionComponent
         },
       ),
     );
-  }
-
-  Future<void> reloadPicture(bool removeOldPicture) async {
-    if (removeOldPicture) {
-      remove(picture);
-    }
-    Image image = await Flame.images.load(
-      "${world.currentDimension.tileValues[valueId]}.png",
-    );
-    SpriteComponent newPicture = SpriteComponent(
-      sprite: Sprite(image),
-      size: Vector2.all(size.x * Globals.tileIconSizeCoef),
-      anchor: Anchor.center,
-      position: Vector2(size.x / 2, size.y / 2),
-    );
-    picture = newPicture;
-    add(picture);
   }
 }

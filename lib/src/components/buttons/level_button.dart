@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:match_3_game/src/components/buttons/default_buttons.dart';
@@ -14,12 +12,9 @@ class LevelButton extends TextButton with HasWorldReference<GameWorld> {
     required super.size,
     required this.levelId,
     required this.completed,
-  }) : super(
-         color: GameColors.uncompletedLevelColor,
-         tapColor: GameColors.red,
-         textString: levelId.toString(),
-         fontSize: size.x / 2,
-       );
+    required super.color,
+    required super.tapColor,
+  }) : super(textString: levelId.toString());
 
   @override
   Future<void> onLoad() async {

@@ -24,23 +24,21 @@ class LevelMenu extends PositionComponent
 
   void regenerate() {
     int previousLevelNum = levelNum;
-    levelNum = world.currentDimension.levels.length;
+    levelNum = game.currentDimension.levels.length;
 
-    int delta = levelNum - previousLevelNum;
-    if (delta < 0) {
-      for (int i = previousLevelNum; i > levelNum; i--) {
-        levelButtons.removeLast().removeFromTheGrid();
-      }
-    } else if (delta > 0) {
-      for (int i = previousLevelNum; i < levelNum; i++) {
-        LevelButton newButton = LevelButton(
-          size: levelButtonSize,
-          completed: false,
-          levelId: i,
-        )..position = getButtonPosition(i);
-        add(newButton);
-        levelButtons.add(newButton);
-      }
+    for (int i = 0; i < previousLevelNum; i++) {
+      levelButtons.removeLast().removeFromTheGrid();
+    }
+    for (int i = 0; i < levelNum; i++) {
+      LevelButton newButton = LevelButton(
+        size: levelButtonSize,
+        completed: false,
+        levelId: i,
+        color: game.currentDimension.colors[0],
+        tapColor: game.currentDimension.colors[1],
+      )..position = getButtonPosition(i);
+      add(newButton);
+      levelButtons.add(newButton);
     }
   }
 

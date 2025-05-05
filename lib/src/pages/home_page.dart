@@ -11,6 +11,11 @@ import 'package:match_3_game/src/globals.dart' hide GameColors;
 class HomePage extends Component with HasGameRef<Match3Game> {
   @override
   Future<void> onLoad() async {
+    return super.onLoad();
+  }
+
+  @override
+  void onMount() {
     Vector2 menuSize = Vector2(
       gameRef.size.x - Globals.menuXOffset * 2,
       Globals.menuHeight,
@@ -19,9 +24,8 @@ class HomePage extends Component with HasGameRef<Match3Game> {
       Globals.menuXOffset,
       (gameRef.size.y - menuSize.y) / 2,
     );
-    add(HomePageBackground());
-    add(Menu(menuPosition, menuSize));
-    return super.onLoad();
+    addAll([DimensionBackground(), Menu(menuPosition, menuSize)]);
+    super.onMount();
   }
 }
 
@@ -55,14 +59,15 @@ class Menu extends PositionComponent with HasGameRef<Match3Game> {
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    _startButton?.position = Vector2.zero();
-    _settingsButton?.position = Vector2(
-      0,
-      Globals.menuButtonsHeight + Globals.menuButtonsOffset,
-    );
-    _autorsButton?.position = Vector2(
-      Globals.menuButtonsHeight + Globals.menuButtonsOffset,
-      Globals.menuButtonsHeight + Globals.menuButtonsOffset,
-    );
+    _startButton?.position = _startButton!.size / 2;
+    _settingsButton?.position =
+        _settingsButton!.size / 2 +
+        Vector2(0, Globals.menuButtonsHeight + Globals.menuButtonsOffset);
+    _autorsButton?.position =
+        _autorsButton!.size / 2 +
+        Vector2(
+          Globals.menuButtonsHeight + Globals.menuButtonsOffset,
+          Globals.menuButtonsHeight + Globals.menuButtonsOffset,
+        );
   }
 }

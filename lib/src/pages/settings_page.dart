@@ -3,16 +3,18 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:match_3_game/src/components/buttons/back_button.dart';
 import 'package:match_3_game/src/game.dart';
+import 'package:match_3_game/src/globals.dart';
+import 'package:match_3_game/src/tools/sprite_cache.dart';
 
 class SettingsPage extends Component with HasGameRef<Match3Game> {
   @override
   Future<void> onLoad() async {
-    Vector2 screenSize = game.size;
-    add(
-      BackButton(size: Vector2.all(50))
-        ..position = Vector2(screenSize.x / 2, screenSize.y / 2)
-        ..anchor = Anchor.center,
-    );
+    Sprite backSprite = await SpriteCache.getSprite("settings_background.jpg");
+    addAll([
+      SpriteComponent(sprite: backSprite, size: game.size),
+      BackButton(size: Globals.defaultButtonSize)
+        ..position = Globals.defaultButtonSize,
+    ]);
     return super.onLoad();
   }
 }

@@ -7,6 +7,8 @@ import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:match_3_game/src/algorithms/check_combinations.dart';
 import 'package:match_3_game/src/algorithms/get_alailiable_id.dart';
+import 'package:match_3_game/src/audio_service.dart';
+import 'package:match_3_game/src/components/input_blocker.dart';
 import 'package:match_3_game/src/game.dart';
 import 'package:match_3_game/src/game_world.dart';
 import 'package:match_3_game/src/globals.dart';
@@ -34,14 +36,22 @@ class Field extends PositionComponent
       Paint()..color = GameColors.tileBackgroundColor;
   final Paint _tileBoxColor = Paint()..color = GameColors.white;
 
+  final InputBlocker blocker;
+
+  bool isLose = false;
+  bool isWin = false;
+
   Field({required super.size, required this.elementPerRow})
     : tileMatrix = List.generate(
         elementPerRow,
         (_) => List.generate(elementPerRow, (_) => null),
-      );
+      ),
+      blocker = InputBlocker(size: size);
 
   @override
   Future<void> onLoad() async {
+    lock();
+    priority = 20;
     drawableField = ClipComponent.rectangle(size: size);
     add(drawableField);
 
@@ -121,49 +131,55 @@ class Field extends PositionComponent
   }
 
   Future<void> regenerate() async {
+    combinations.clear();
     clear();
     fillEmptyField(
       List.generate(tileMatrix[0].length, (_) => tileMatrix.length),
     );
   }
 
-  Future<void> changeDimension() async {
-    for (List<Tile?> row in tileMatrix) {
-      for (Tile? tile in row) {
-        tile?.reloadPicture(true);
-      }
-    }
-  }
-
   bool isAnimating = false;
+  List<List<Tile>> combinations = [];
   Future<void> makeTurn(Tile firstTile, Tile secondTile) async {
     if (isAnimating || !firstTile.moveable || !secondTile.moveable) return;
     swapTiles(firstTile, secondTile);
 
-    List<List<Tile>> combinations = getCombinations(tileMatrix);
+    combinations = getCombinations(tileMatrix);
 
     if (combinations.isEmpty) {
       swapTiles(firstTile, secondTile);
     } else {
+      isLose = world.turnsCounter.increment();
       List<int> dropIndexes = [];
       isAnimating = true;
       while (combinations.isNotEmpty) {
-        makeUnmoveable(combinations);
+        List<Tile> tilesFromCombinations =
+            (Set<Tile>.from(combinations.expand((el) => el))).toList();
+        makeTilesUnmoveable(tilesFromCombinations);
         await Future.delayed(
           Duration(milliseconds: Globals.waitDurationMiliseconds),
         );
-        removeTiles(combinations);
-        addPoints(combinations);
-        dropIndexes = await dropTiles();
-        fillEmptyField(dropIndexes);
-        combinations = getCombinations(tileMatrix);
+        if (combinations.isNotEmpty) {
+          removeTilesAndAddPoints(tilesFromCombinations, true);
+          dropIndexes = await dropTiles();
+          fillEmptyField(dropIndexes);
+          combinations = getCombinations(tileMatrix);
+        }
+      }
+      if (isLose && !isWin) {
+        game.router.pushNamed("lose");
+        return;
+      } else if (isWin) {
+        return;
       }
       await Future.delayed(
         Duration(
           milliseconds:
-              (dropIndexes.reduce((a, b) => a > b ? a : b) *
-                      Globals.tileDropDuration *
-                      1000)
+              (dropIndexes.isNotEmpty
+                      ? dropIndexes.reduce((a, b) => a > b ? a : b) *
+                          Globals.tileDropDuration *
+                          1000
+                      : 0)
                   .toInt(),
         ),
       );
@@ -173,6 +189,8 @@ class Field extends PositionComponent
 
   void swapTiles(Tile firstTile, Tile secondTile) {
     selectedTile = null;
+
+    AudioService().playWhoosh();
 
     // меняем местами в tiles
     tileMatrix[firstTile.rowIndex][firstTile.columnindex] = secondTile;
@@ -339,16 +357,34 @@ class Field extends PositionComponent
     return tileMatrix[row][column];
   }
 
-  void removeTiles(List<List<Tile?>> combinations) {
-    List<Tile?> tilesToRemove = combinations.expand((list) => list).toList();
+  Future<void> removeTilesAndAddPoints(
+    List<Tile?> tilesToRemove,
+    bool addPoints,
+  ) async {
+    if (!world.isMenu) {
+      AudioService().playDrop();
+    }
     for (Tile? tile in tilesToRemove) {
       if (tile == null) continue;
-      tileMatrix[tile.rowIndex][tile.columnindex] = null;
+      int id = tile.valueId;
+      if (addPoints &&
+          id < world.scores.scoringPoints.length &&
+          (world.scores.scoringPoints[id]["needed"]! >
+              world.scores.scoringPoints[id]["completed"]!)) {
+        world.scores.scores[tile.valueId].updateScore(1);
+        if (world.scores.isLevelCompleted()) {
+          lock();
+          await Future.delayed(
+            Duration(milliseconds: Globals.waitDurationMiliseconds * 3),
+          );
+          game.router.pushNamed("win");
+          isWin = true;
+        }
+      }
       tile.removeFromGrid();
+      tileMatrix[tile.rowIndex][tile.columnindex] = null;
     }
   }
-
-  void addPoints(List<List<Tile>> combinations) {}
 
   Future<List<int>> dropTiles() async {
     List<int> dropIndexes = List.generate(tileMatrix[0].length, (_) => 0);
@@ -395,15 +431,22 @@ class Field extends PositionComponent
     );
   }
 
-  void makeUnmoveable(List<List<Tile>> currentCombinations) {
-    List<Tile> tilesToRemove =
-        currentCombinations.expand((list) => list).toList();
+  void makeTilesUnmoveable(List<Tile> tilesToRemove) {
     for (Tile tile in tilesToRemove) {
       tile.moveable = false;
     }
   }
 
+  void lock() {
+    add(blocker);
+  }
+
+  void unock() {
+    blocker.removeFromParent();
+  }
+
   void clear() {
-    removeTiles(tileMatrix);
+    List<Tile?> tilesToRemove = tileMatrix.expand((list) => list).toList();
+    removeTilesAndAddPoints(tilesToRemove, false);
   }
 }
